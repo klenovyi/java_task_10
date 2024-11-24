@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class Program {
     public static void printHelp() {
         System.out.println(
-                "Использование: java <classname> [INPUT] [OUTPUT] [--window]\n"+
+                "Использование: java <classname> [INPUT] [OUTPUT] [--window]\n" +
                         "Увеличивает каждый элемент целочисленного массива из файла INPUT на 1. Результат записывается в файл OUTPUT.\n"
         );
     }
@@ -23,8 +23,7 @@ public class Program {
         InputArgs inputArgs = null;
         try {
             inputArgs = InputArgs.ParseArgs(args);
-        }
-        catch (CmdArgsParseError e){
+        } catch (CmdArgsParseError e) {
             printHelp();
             System.err.println("Ошибка разбора аргументов коммандной строки");
             System.exit(1);
@@ -36,7 +35,9 @@ public class Program {
 
             int[] arr = ArrayUtils.readIntArrayFromFile(inputArgs.inputFile);
             java.util.List<Integer> integerList = Arrays.stream(arr).boxed().collect(Collectors.toList());
-            java.util.List<Integer> newList = Task.Process(integerList);
+            int[] arr2 = ArrayUtils.createRandomIntArray(10, -10, 10);
+            java.util.List<Integer> integerList2 = Arrays.stream(arr2).boxed().collect(Collectors.toList());
+            java.util.List<Integer> newList = Task.createNewList(integerList, integerList2);
             int[] newArr = newList.stream().mapToInt(Integer::intValue).toArray();
 
             try {
