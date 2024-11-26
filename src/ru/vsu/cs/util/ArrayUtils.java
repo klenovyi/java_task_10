@@ -1,17 +1,60 @@
 package ru.vsu.cs.util;
 
+import ru.vsu.cs.course1.Apartament;
+import ru.vsu.cs.course1.DistrictAndPricePerSquareMeter;
+
+import java.io.*;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 
 public class ArrayUtils {
     private static final Random RND = new Random();
 
+    public static void writeResultToFile(String filename, List<DistrictAndPricePerSquareMeter> districtAndPricePerSquareMeters)
+            throws FileNotFoundException {
+        try (PrintWriter out = new PrintWriter(filename)) {
+            for (DistrictAndPricePerSquareMeter pricePerSquareMeter : districtAndPricePerSquareMeters) {
+                out.println(pricePerSquareMeter);
+            }
+        }
+    }
+
+    public static void writeApartamentToFile(String filename, List<Apartament> apartaments)
+            throws FileNotFoundException {
+        try (PrintWriter out = new PrintWriter(filename)) {
+            for (Apartament apartament : apartaments) {
+                out.println(apartament);
+            }
+        }
+    }
+
+    static public ArrayList<Apartament> readApartamentsFromFile(String filename) throws IOException {
+        ArrayList<Apartament> apartaments = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line = br.readLine();
+            while (line != null) {
+                String[] words = line.split(" ");
+                if (words.length == 5) {
+                    String districtName = words[0];
+                    Apartament apartament = new Apartament(districtName,
+                            Integer.valueOf(words[1]),
+                            Double.valueOf(words[2]),
+                            Double.valueOf(words[3]),
+                            Integer.valueOf(words[4])
+                    );
+                    apartaments.add(apartament);
+                }
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            throw new IOException("file doesnt open");
+        }
+
+        return apartaments;
+    }
 
     public static int[] toPrimitive(Integer[] arr) {
         if (arr == null) {

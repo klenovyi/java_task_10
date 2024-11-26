@@ -5,7 +5,10 @@ import ru.vsu.cs.util.SwingUtils;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -17,6 +20,8 @@ public class Program {
                         "Увеличивает каждый элемент целочисленного массива из файла INPUT на 1. Результат записывается в файл OUTPUT.\n"
         );
     }
+
+
 
 
     public static void main(String[] args) throws Exception {
@@ -32,16 +37,11 @@ public class Program {
         if (inputArgs.window) {
             runWindow();
         } else {
-
-            int[] arr = ArrayUtils.readIntArrayFromFile(inputArgs.inputFile);
-            java.util.List<Integer> integerList = Arrays.stream(arr).boxed().collect(Collectors.toList());
-            int[] arr2 = ArrayUtils.createRandomIntArray(10, -10, 10);
-            java.util.List<Integer> integerList2 = Arrays.stream(arr2).boxed().collect(Collectors.toList());
-            java.util.List<Integer> newList = Task.createNewList(integerList, integerList2);
-            int[] newArr = newList.stream().mapToInt(Integer::intValue).toArray();
-
             try {
-                ArrayUtils.writeArrayToFile(inputArgs.outputFile, newArr);
+                ArrayList<Apartament> apartamentList  = ArrayUtils.readApartamentsFromFile(inputArgs.inputFile);
+                List<DistrictAndPricePerSquareMeter> districtAndPricePerSquareMeters = Task.averageSquareInDistrict(apartamentList);
+                ArrayUtils.writeResultToFile(inputArgs.outputFile, districtAndPricePerSquareMeters);
+
             } catch (IOException e) {
                 System.err.printf("Ошибка при записи массива в файл %s", e);
                 System.exit(3);

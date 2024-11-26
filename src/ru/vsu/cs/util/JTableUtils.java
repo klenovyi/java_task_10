@@ -1,5 +1,7 @@
 package ru.vsu.cs.util;
 
+import ru.vsu.cs.course1.Apartament;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -72,6 +74,7 @@ public class JTableUtils {
     private static final Border DEFAULT_EDITOR_CELL_BORDER = BorderFactory.createEmptyBorder(0, 3, 0, 2);
 
     private static final Map<JTable, Integer> tableColumnWidths = new HashMap<>();
+
 
     private static final NumberFormat defaultNumberFormat = NumberFormat.getInstance(Locale.ROOT);
     private static double parseDouble(String s) throws NumberFormatException {

@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -23,18 +24,13 @@ public class FrameMain extends JFrame {
     private JPanel panelMain;
     private JTable tableInput;
     private JButton buttonLoadInputFromFile;
-    private JButton buttonRandomInput;
     private JButton buttonSaveInputInfoFile;
     private JButton buttonExecute;
     private JButton buttonSaveOutputIntoFile;
     private JTable tableOutput;
     private JScrollPane scrollPaneTableInput;
     private JScrollPane scrollPaneTableOutput;
-    private JScrollPane scrollPaneTableInput2;
-    private JTable tableInput2;
-    private JButton buttonLoadInputFromFile2;
-    private JButton buttonRandomInput2;
-    private JButton buttonSaveInputInfoFile2;
+
 
     private JFileChooser fileChooserOpen;
     private JFileChooser fileChooserSave;
@@ -54,15 +50,13 @@ public class FrameMain extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
 
-        JTableUtils.initJTableForArray(tableInput, 40, false, true, false, true);
-        JTableUtils.initJTableForArray(tableInput2, 40, false, true, false, true);
-        JTableUtils.initJTableForArray(tableOutput, 40, false, true, false, true);
+
+        JTableUtils.initJTableForArray(tableInput, 90, false, true, true, false);
+        JTableUtils.initJTableForArray(tableOutput, 90, false, true, true, false);
         //tableOutput.setEnabled(false);
         tableInput.setRowHeight(25);
-        tableInput2.setRowHeight(25);
         tableOutput.setRowHeight(25);
         scrollPaneTableInput.setPreferredSize(new Dimension(-1, 90));
-        scrollPaneTableInput2.setPreferredSize(new Dimension(-1, 90));
         scrollPaneTableOutput.setPreferredSize(new Dimension(-1, 90));
 
         fileChooserOpen = new JFileChooser();
@@ -85,9 +79,6 @@ public class FrameMain extends JFrame {
         menuBarMain.add(menuLookAndFeel);
         SwingUtils.initLookAndFeelMenu(menuLookAndFeel);
 
-        JTableUtils.writeArrayToJTable(tableInput, new int[]{0, 1, 2, 3, 4, 5});
-        JTableUtils.writeArrayToJTable(tableInput2, new int[]{2, 3, 5, 0, 1, 10});
-
         this.pack();
 
 
@@ -96,21 +87,9 @@ public class FrameMain extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     if (fileChooserOpen.showOpenDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        int[] arr = ArrayUtils.readIntArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
-                        JTableUtils.writeArrayToJTable(tableInput, arr);
-                    }
-                } catch (Exception e) {
-                    SwingUtils.showErrorMessageBox(e);
-                }
-            }
-        });
-        buttonLoadInputFromFile2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    if (fileChooserOpen.showOpenDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        int[] arr = ArrayUtils.readIntArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
-                        JTableUtils.writeArrayToJTable(tableInput2, arr);
+                        ArrayList<Apartament> apartaments = ArrayUtils.readApartamentsFromFile(fileChooserOpen.getSelectedFile().getPath());
+                        String[][] str = Apartament.toStringArray(apartaments);
+                        JTableUtils.writeArrayToJTable(tableInput, str);
                     }
                 } catch (Exception e) {
                     SwingUtils.showErrorMessageBox(e);
@@ -118,57 +97,19 @@ public class FrameMain extends JFrame {
             }
         });
 
-        buttonRandomInput.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    int[] arr = ArrayUtils.createRandomIntArray(tableInput.getColumnCount(), 100);
-                    JTableUtils.writeArrayToJTable(tableInput, arr);
-                } catch (Exception e) {
-                    SwingUtils.showErrorMessageBox(e);
-                }
-            }
-        });
-        buttonRandomInput2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    int[] arr = ArrayUtils.createRandomIntArray(tableInput2.getColumnCount(), 100);
-                    JTableUtils.writeArrayToJTable(tableInput2, arr);
-                } catch (Exception e) {
-                    SwingUtils.showErrorMessageBox(e);
-                }
-            }
-        });
 
         buttonSaveInputInfoFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        int[] arr = JTableUtils.readIntArrayFromJTable(tableInput);
+                        String[][] str = JTableUtils.readStringMatrixFromJTable(tableInput);
                         String file = fileChooserSave.getSelectedFile().getPath();
                         if (!file.toLowerCase().endsWith(".txt")) {
                             file += ".txt";
                         }
-                        ArrayUtils.writeArrayToFile(file, arr);
-                    }
-                } catch (Exception e) {
-                    SwingUtils.showErrorMessageBox(e);
-                }
-            }
-        });
-        buttonSaveInputInfoFile2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        int[] arr = JTableUtils.readIntArrayFromJTable(tableInput2);
-                        String file = fileChooserSave.getSelectedFile().getPath();
-                        if (!file.toLowerCase().endsWith(".txt")) {
-                            file += ".txt";
-                        }
-                        ArrayUtils.writeArrayToFile(file, arr);
+                        ArrayList<Apartament> apartaments = Apartament.toList(str);
+                        ArrayUtils.writeApartamentToFile(file, apartaments);
                     }
                 } catch (Exception e) {
                     SwingUtils.showErrorMessageBox(e);
@@ -180,16 +121,15 @@ public class FrameMain extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    int[] arr = JTableUtils.readIntArrayFromJTable(tableInput);
-                    int[] arr2 = JTableUtils.readIntArrayFromJTable(tableInput2);
-                    java.util.List<Integer> integerList = Arrays.stream(arr).boxed().collect(Collectors.toList());
-                    java.util.List<Integer> integerList2 = Arrays.stream(arr2).boxed().collect(Collectors.toList());
-                    java.util.List<Integer> newList = Task.createNewList(integerList, integerList2);
-                    int[] newArr = newList.stream().mapToInt(Integer::intValue).toArray();
-                    JTableUtils.writeArrayToJTable(tableOutput, newArr);
+                    String[][] str = JTableUtils.readStringMatrixFromJTable(tableInput);
+                    ArrayList<Apartament> apartaments = Apartament.toList(str);
+                    List<DistrictAndPricePerSquareMeter> districtAndPricePerSquareMeters = Task.averageSquareInDistrict(apartaments);
+                    String results[][] = DistrictAndPricePerSquareMeter.toStringArray(districtAndPricePerSquareMeters);
+                    JTableUtils.writeArrayToJTable(tableOutput, results);
                 } catch (Exception e) {
                     SwingUtils.showErrorMessageBox(e);
                 }
+
             }
         });
         buttonSaveOutputIntoFile.addActionListener(new ActionListener() {
@@ -197,12 +137,13 @@ public class FrameMain extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        int[] arr = JTableUtils.readIntArrayFromJTable(tableOutput);
+                        String[][] str = JTableUtils.readStringMatrixFromJTable(tableOutput);
                         String file = fileChooserSave.getSelectedFile().getPath();
                         if (!file.toLowerCase().endsWith(".txt")) {
                             file += ".txt";
                         }
-                        ArrayUtils.writeArrayToFile(file, arr);
+                        ArrayList<DistrictAndPricePerSquareMeter> districtAndPricePerSquareMeters = DistrictAndPricePerSquareMeter.toList(str);
+                        ArrayUtils.writeResultToFile(file, districtAndPricePerSquareMeters);
                     }
                 } catch (Exception e) {
                     SwingUtils.showErrorMessageBox(e);
@@ -227,36 +168,33 @@ public class FrameMain extends JFrame {
      */
     private void $$$setupUI$$$() {
         panelMain = new JPanel();
-        panelMain.setLayout(new GridLayoutManager(8, 2, new Insets(10, 10, 10, 10), 10, 10));
+        panelMain.setLayout(new GridLayoutManager(6, 2, new Insets(10, 10, 10, 10), 10, 10));
         scrollPaneTableInput = new JScrollPane();
         scrollPaneTableInput.setVerticalScrollBarPolicy(21);
-        panelMain.add(scrollPaneTableInput, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 85), null, 0, false));
+        panelMain.add(scrollPaneTableInput, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 85), null, 0, false));
         tableInput = new JTable();
         scrollPaneTableInput.setViewportView(tableInput);
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panelMain.add(panel1, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonLoadInputFromFile = new JButton();
         buttonLoadInputFromFile.setText("Загрузить из файла");
         panel1.add(buttonLoadInputFromFile, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        buttonRandomInput = new JButton();
-        buttonRandomInput.setText("Заполнить случайными числами");
-        panel1.add(buttonRandomInput, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonSaveInputInfoFile = new JButton();
         buttonSaveInputInfoFile.setText("Сохранить в файл");
-        panel1.add(buttonSaveInputInfoFile, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel1.add(buttonSaveInputInfoFile, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        panel1.add(spacer1, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, new Dimension(100, -1), null, 0, false));
+        panel1.add(spacer1, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, new Dimension(100, -1), null, 0, false));
         scrollPaneTableOutput = new JScrollPane();
         scrollPaneTableOutput.setEnabled(true);
         scrollPaneTableOutput.setVerticalScrollBarPolicy(21);
-        panelMain.add(scrollPaneTableOutput, new GridConstraints(5, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 85), null, 0, false));
+        panelMain.add(scrollPaneTableOutput, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 85), null, 0, false));
         tableOutput = new JTable();
         tableOutput.setEnabled(true);
         scrollPaneTableOutput.setViewportView(tableOutput);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panelMain.add(panel2, new GridConstraints(4, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panelMain.add(panel2, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonExecute = new JButton();
         buttonExecute.setText("Выполнить");
         panel2.add(buttonExecute, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -264,33 +202,14 @@ public class FrameMain extends JFrame {
         panel2.add(spacer2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panelMain.add(panel3, new GridConstraints(6, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panelMain.add(panel3, new GridConstraints(4, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonSaveOutputIntoFile = new JButton();
         buttonSaveOutputIntoFile.setText("Сохранить в файл");
         panel3.add(buttonSaveOutputIntoFile, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
         panel3.add(spacer3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
-        panelMain.add(spacer4, new GridConstraints(7, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 30), null, 0, false));
-        scrollPaneTableInput2 = new JScrollPane();
-        scrollPaneTableInput2.setVerticalScrollBarPolicy(21);
-        panelMain.add(scrollPaneTableInput2, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 85), null, 0, false));
-        tableInput2 = new JTable();
-        scrollPaneTableInput2.setViewportView(tableInput2);
-        final JPanel panel4 = new JPanel();
-        panel4.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
-        panelMain.add(panel4, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        buttonLoadInputFromFile2 = new JButton();
-        buttonLoadInputFromFile2.setText("Загрузить из файла");
-        panel4.add(buttonLoadInputFromFile2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        buttonRandomInput2 = new JButton();
-        buttonRandomInput2.setText("Заполнить случайными числами");
-        panel4.add(buttonRandomInput2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        buttonSaveInputInfoFile2 = new JButton();
-        buttonSaveInputInfoFile2.setText("Сохранить в файл");
-        panel4.add(buttonSaveInputInfoFile2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer5 = new Spacer();
-        panel4.add(spacer5, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, new Dimension(100, -1), null, 0, false));
+        panelMain.add(spacer4, new GridConstraints(5, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 30), null, 0, false));
     }
 
     /**
